@@ -1,18 +1,40 @@
 package main
 
-impor (
+import (
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 )
 
-type User struct {
-	Id             string   `json:"id"`
-	Email          string   `json:"email"`
-	HashedPassword []byte   `json:"hashed_password"`
-	DateOfBirth    string   `json:"date_of_birth"`
-	BirthPlace     string   `json:"birth_place"`
-	Friends        []string `json:"friends"`
+func getInput(s string, r *bufio.Reader) (string, error) {
+	fmt.Print(s)
+	input, err := r.ReadString('\n')
+	return strings.TrimSpace(input), err
+}
+
+func createBill() bill {
+	reader := bufio.NewReader(os.Stdin)
+
+	name, _ := getInput("Create a new bill name: ", reader)
+
+	b := newBill(name)
+	fmt.Println("Created the bill - ", b.name)
+
+	return b
+}
+
+func promptOptions(b bill) {
+	reader := bufio.NewReader(os.Stdin)
+
+	opt, _ := getInput("Choose option (a - add item, s - save bill, t - add tip)", reader)
+	fmt.Println(opt)
 }
 
 func main() {
-	fmt.Print("Hello World!")
+	mybill := createBill()
+
+	promptOptions(mybill)
+
+	fmt.Println(mybill)
 }
