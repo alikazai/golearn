@@ -10,9 +10,11 @@ func TestCreateUser(t *testing.T) {
 
 	pStore := NewPostgresStore(nil)
 
+	oldPassword := "password"
+
 	user := &domain.User{
 		Email:    "test@test.com",
-		Password: "password",
+		Password: oldPassword,
 		Name:     "John Doe",
 	}
 
@@ -26,4 +28,11 @@ func TestCreateUser(t *testing.T) {
 		t.Errorf("Want id not to be zero")
 	}
 
+	if user.Name != createdUser.Name {
+		t.Errorf("expected %q; got %q", user.Name, createdUser.Name)
+	}
+
+	if createdUser.Password == oldPassword {
+		t.Errorf("Password was not hashed")
+	}
 }
