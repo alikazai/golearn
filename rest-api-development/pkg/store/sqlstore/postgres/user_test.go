@@ -8,7 +8,7 @@ import (
 
 func TestCreateUser(t *testing.T) {
 
-	pStore := NewPostgresStore(nil)
+	pStore := NewPostgresStore(testDb)
 
 	oldPassword := "password"
 
