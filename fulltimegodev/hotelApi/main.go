@@ -3,58 +3,38 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
-	"log"
-
 	"github.com/alikazai/golearn/api"
-	"github.com/alikazai/golearn/types"
+	"github.com/alikazai/golearn/db"
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 )
 
-const (
-	dbUri    = "mongodb://localhost:27017"
-	dbName   = "hotel-reservation"
-	userColl = "users"
-)
+const dbUri = "mongodb://localhost:27017"
+
+var config = fiber.Config{
+	ErrorHandler: func(c *fiber.Ctx, err error) error {
+		return c.JSON(map[string]string{"error": err.Error()})
+	},
+}
 
 func main() {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dbUri))
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	ctx := context.Background()
-	coll := client.Database(dbName).Collection(userColl)
-	user := types.User{
-		FirstName: "James",
-		LastName:  "Day",
-	}
-	_, err = coll.InsertOne(ctx, user)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var james types.User
-
-	if err := coll.FindOne(ctx, bson.M{}).Decode(&james); err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(james)
+	// handlers inilitialisation
+	userHandler := api.NewUserHandler(db.NewMongoUserStore(client))
 
 	listenAddr := flag.String("listenAddr", ":7500", "The listen address of the API server")
 	flag.Parse()
 
-	app := fiber.New()
+	app := fiber.New(config)
 	appv1 := app.Group("/api/v1")
 
-	userHandler := api.NewUserHandler()
-
-	appv1.Get("/user", api.HandleGetUsers)
-	appv1.Get("/user/:id", api.HandleGetUser)
+	appv1.Get("/user", userHandler.HandleGetUsers)
+	appv1.Get("/user/:id", userHandler.HandleGetUser)
 
 	app.Listen(*listenAddr)
 }

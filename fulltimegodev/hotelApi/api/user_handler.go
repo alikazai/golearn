@@ -1,8 +1,7 @@
 package api
 
 import (
-	"log"
-
+	"context"
 	"github.com/alikazai/golearn/db"
 	"github.com/alikazai/golearn/types"
 	"github.com/gofiber/fiber/v2"
@@ -19,8 +18,11 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 }
 
 func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
-	id := c.Params("id")
-	user, err := h.userStore.GetUserById(id)
+	var (
+		id  = c.Params("id")
+		ctx = context.Background()
+	)
+	user, err := h.userStore.GetUserById(ctx, id)
 
 	if err != nil {
 		return err
