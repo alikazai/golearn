@@ -9,6 +9,7 @@ import (
 	"github.com/alikazai/golearn/api"
 	"github.com/alikazai/golearn/types"
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -31,13 +32,18 @@ func main() {
 		FirstName: "James",
 		LastName:  "Day",
 	}
-	res, err := coll.InsertOne(ctx, user)
+	_, err = coll.InsertOne(ctx, user)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(res)
 
-	fmt.Println(client)
+	var james types.User
+
+	if err := coll.FindOne(ctx, bson.M{}).Decode(&james); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(james)
 
 	listenAddr := flag.String("listenAddr", ":7500", "The listen address of the API server")
 	flag.Parse()
