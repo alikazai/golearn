@@ -51,6 +51,8 @@ func main() {
 	app := fiber.New()
 	appv1 := app.Group("/api/v1")
 
+	userHandler := api.NewUserHandler()
+
 	appv1.Get("/user", api.HandleGetUsers)
 	appv1.Get("/user/:id", api.HandleGetUser)
 
